@@ -2,480 +2,430 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1000 Уровней: Двойной прыжок, Боты!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Perfect Runner: Боты, 5 Костюмов</title>
     <style>
-        body { margin: 0; background: #2c3e50; font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; user-select: none; overflow: hidden; }
+        body { margin: 0; background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; user-select: none; overflow: hidden; flex-direction: column; }
         
         #menu {
-            position: absolute; background: #34495e; padding: 40px; border-radius: 20px; text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8); color: white; z-index: 100; max-width: 450px;
+            position: absolute; background: rgba(30, 41, 59, 0.95); padding: 20px; border-radius: 25px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9); color: white; z-index: 100; width: 85%; max-width: 550px;
+            border: 2px solid #f1c40f; max-height: 90vh; overflow-y: auto; backdrop-filter: blur(10px);
         }
-        #menu h1 { margin-top: 0; color: #f1c40f; font-size: 36px; text-shadow: 2px 2px 0 #000; }
-        #menu label { display: block; margin: 20px 0; font-size: 18px; }
-        #menu input[type="color"] { width: 70px; height: 70px; border: 4px solid #fff; border-radius: 50%; cursor: pointer; background: none; padding: 0; outline: none; }
-        #menu button {
-            background: #1abc9c; color: white; font-size: 24px; font-weight: bold;
-            padding: 15px 40px; border: none; border-radius: 15px; cursor: pointer;
-            box-shadow: 0 5px 0 #16a085; transition: 0.1s; margin-top: 10px;
-        }
-        #menu button:active { transform: translateY(5px); box-shadow: none; }
+        #menu h1 { margin-top: 0; color: #f1c40f; font-size: 28px; text-shadow: 2px 2px 0 #000; }
         
-        #shop {
-            display: none; position: absolute; background: rgba(0,0,0,0.85); padding: 30px; border-radius: 20px;
-            text-align: center; color: white; z-index: 90; width: 600px; max-width: 90%;
-            backdrop-filter: blur(5px); border: 2px solid #f1c40f;
+        .skin-grid { 
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 10px 0; padding: 5px;
         }
-        #shop h2 { color: #f1c40f; margin-top: 0; display: flex; justify-content: space-between; width: 100%; }
-        #shop .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-        #shop .item {
-            background: #2c3e50; padding: 15px; border-radius: 10px; border: 1px solid #555;
-            display: flex; flex-direction: column; align-items: center;
+        .skin-btn {
+            background: #1e293b; color: white; padding: 10px; border-radius: 12px; cursor: pointer;
+            border: 3px solid transparent; font-size: 12px; text-align: center; transition: 0.2s; font-weight: bold;
         }
-        #shop .item .price { color: #f1c40f; font-weight: bold; }
-        #shop .item button {
-            background: #e67e22; border: none; padding: 5px 15px; color: white; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 5px;
-        }
-        #shop .item button:disabled { background: #555; cursor: not-allowed; }
-        #shop .close-shop {
-            background: #e74c3c; border: none; color: white; padding: 10px 20px; border-radius: 10px; font-size: 18px; cursor: pointer; margin-top: 10px;
+        .skin-btn.equipped { border-color: #facc15; background: #3b82f6; transform: scale(1.05); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        
+        .start-btn {
+            background: #10b981; color: white; font-size: 20px; font-weight: bold;
+            padding: 12px 40px; border: none; border-radius: 25px; cursor: pointer;
+            margin-top: 15px; width: 100%; box-shadow: 0 5px 0 #059669;
         }
         
-        #gameWrapper { display: none; background: #34495e; padding: 20px; border-radius: 15px; position: relative; }
-        canvas { background: #a4d3ee; display: block; border: 4px solid #1abc9c; border-radius: 5px; cursor: grab; }
+        #fullscreen-btn { background: #8b5cf6; color: white; padding: 8px 15px; border: none; border-radius: 15px; cursor: pointer; margin-left: 10px; font-size: 12px; }
+
+        #gameWrapper { display: none; background: #1e293b; padding: 10px; border-radius: 20px; position: relative; width: 96vw; height: 60vw; max-width: 800px; max-height: 500px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; touch-action: none; background: #87CEEB; }
         
         #hud {
-            position: absolute; top: 5px; left: 0; width: 100%; display: flex; justify-content: space-between;
-            padding: 10px 20px; box-sizing: border-box; pointer-events: none; z-index: 10;
+            position: absolute; top: 3%; left: 0; width: 100%; display: flex; justify-content: space-between;
+            padding: 0 3%; box-sizing: border-box; pointer-events: none; z-index: 10;
         }
         #hud span {
-            background: rgba(0,0,0,0.7); color: white; padding: 5px 15px; border-radius: 8px; 
-            font-weight: bold; font-size: 16px; pointer-events: auto;
+            background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 25px; 
+            font-weight: bold; font-size: 14px; pointer-events: auto; backdrop-filter: blur(4px);
         }
-        #hud .btn-toggle { background: #f39c12; cursor: pointer; pointer-events: auto; }
-        .red { color: #e74c3c; } .gold { color: #f1c40f; } .green { color: #2ecc71; }
+        .red { color: #ef4444; } .gold { color: #facc15; } .green { color: #4ade80; }
+
+        @media (pointer: coarse) {
+            #mobile-controls {
+                position: absolute; bottom: 5%; left: 0; width: 100%; display: flex; justify-content: space-between;
+                padding: 0 5%; box-sizing: border-box; z-index: 20; pointer-events: none;
+            }
+            .ctrl-btn {
+                pointer-events: auto; background: rgba(255,255,255,0.15); color: white; border: 2px solid rgba(255,255,255,0.4);
+                border-radius: 50%; width: 18vw; height: 18vw; max-width: 75px; max-height: 75px;
+                font-size: 16px; display: flex; align-items: center; justify-content: center; 
+                backdrop-filter: blur(8px); font-weight: bold;
+            }
+            .ctrl-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
+            .ctrl-jump { border-color: #facc15; background: rgba(250, 204, 21, 0.25); }
+        }
+        @media (pointer: fine) { #mobile-controls { display: none !important; } }
     </style>
 </head>
 <body>
 
-    <!-- МЕНЮ -->
     <div id="menu">
-        <h1>⚔️ SUPER HUMAN ⚔️</h1>
-        <label>Выберите цвет героя:
-            <br><input type="color" id="colorPicker" value="#3498db">
-        </label>
-        <br>
-        <button id="startBtn">НАЧАТЬ ИГРУ</button>
-        <p style="font-size: 12px; color: #95a5a6; margin-top: 15px;">
-            🖱️ Левая кн. = Назад | Правая кн. = Вперёд | Пробел (x2) = Двойной прыжок<br>
-            🏹 E = Выстрел из лука | M = Открыть магазин | Запрыгните на врагов, чтобы убить их!
-        </p>
-    </div>
-
-    <!-- МАГАЗИН -->
-    <div id="shop">
-        <h2>🏪 Магазин <span id="shopCoins">Монет: 0</span></h2>
-        <div class="grid">
-            <div class="item"><b>🗡️ Меч</b><span>Ломает шестерёнки!</span><span class="price">💰 10</span><button onclick="buyItem('sword')">Купить</button></div>
-            <div class="item"><b>🛡️ Щит</b><span>Защита (-50% урона)</span><span class="price">💰 15</span><button onclick="buyItem('shield')">Купить</button></div>
-            <div class="item"><b>🦺 Броня</b><span>+2 к здоровью (макс 7)</span><span class="price">💰 20</span><button onclick="buyItem('armor')">Купить</button></div>
-            <div class="item"><b>🏹 Лук</b><span>Стрелы уничтожают шипы</span><span class="price">💰 25</span><button onclick="buyItem('bow')">Купить</button></div>
-            <div class="item"><b>👢 Ботинки</b><span>Усиливают двойной прыжок!</span><span class="price">💰 30</span><button onclick="buyItem('boots')">Купить</button></div>
+        <h1>⚡ PERFECT RUNNER ⚡</h1>
+        <div>
+            <span>💰 Монет: <span id="menuCoins" class="gold">0</span></span>
+            <button id="fullscreen-btn">⛑️ Экран</button>
         </div>
-        <button class="close-shop" onclick="toggleShop()">Закрыть магазин (M)</button>
+        
+        <b>🎭 ВЫБЕРИ КОСТЮМ:</b>
+        <div class="skin-grid" id="skinGrid"></div>
+        
+        <button class="start-btn" id="startBtn">ИГРАТЬ!</button>
     </div>
 
-    <!-- ИГРА -->
     <div id="gameWrapper">
-        <canvas id="gc" width="800" height="400"></canvas>
+        <canvas id="gc" width="1000" height="600"></canvas>
         <div id="hud">
-            <span>Уровень: <span id="lvlNum" class="gold">1</span></span>
-            <span>❤️: <span id="hpNum" class="red">5</span></span>
-            <span>💰: <span id="coinNum" class="gold">0</span></span>
-            <span class="btn-toggle" onclick="toggleShop()">🏪 Магазин (M)</span>
+            <span>🌍 <span id="lvlNum" class="gold">1</span></span>
+            <span>❤️ <span id="hpNum" class="red">5</span></span>
+            <span>💰 <span id="coinNum" class="gold">0</span></span>
             <span id="statusText">Беги!</span>
+        </div>
+        
+        <div id="mobile-controls">
+            <div style="display:flex; gap:10px; pointer-events:none;">
+                <div class="ctrl-btn" id="touch-left">◀</div>
+                <div class="ctrl-btn" id="touch-right">▶</div>
+            </div>
+            <div class="ctrl-btn ctrl-jump" id="touch-jump">⬆</div>
         </div>
     </div>
 
     <script>
-        // --- ПОЛУЧАЕМ ЭЛЕМЕНТЫ ---
-        const menu = document.getElementById('menu');
-        const shop = document.getElementById('shop');
-        const gameWrapper = document.getElementById('gameWrapper');
-        const startBtn = document.getElementById('startBtn');
-        const colorPicker = document.getElementById('colorPicker');
-        const canvas = document.getElementById('gc');
+        // --- ПОЛНОЭКРАННЫЙ ---
+        document.getElementById('fullscreen-btn').addEventListener('click', () => {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+        });
+
+        // --- ДАННЫЕ ---
+        const canvas = document.getElementById('gc'); canvas.width = 1000; canvas.height = 600;
         const ctx = canvas.getContext('2d');
-        const lvlNum = document.getElementById('lvlNum');
-        const hpNum = document.getElementById('hpNum');
-        const coinNum = document.getElementById('coinNum');
-        const shopCoins = document.getElementById('shopCoins');
-        const statusText = document.getElementById('statusText');
+        const lvlNum = document.getElementById('lvlNum'); const hpNum = document.getElementById('hpNum');
+        const coinNum = document.getElementById('coinNum'); const statusText = document.getElementById('statusText');
+        const skinGrid = document.getElementById('skinGrid'); const menuCoins = document.getElementById('menuCoins');
 
-        let playerColor = "#3498db";
+        // --- 5 КОСТЮМОВ ---
+        const ALL_SKINS = [
+            { id: 0, type: 'Рыцарь', color: '#7f8c8d', desc: '⚔️', ability: 'shield' },
+            { id: 1, type: 'Дракон', color: '#e74c3c', desc: '🐉', ability: 'superJump' },
+            { id: 2, type: 'Маг', color: '#8e44ad', desc: '🧙', ability: 'none' },
+            { id: 3, type: 'Зомби', color: '#27ae60', desc: '🧟', ability: 'none' },
+            { id: 4, type: 'Тень', color: '#0f172a', desc: '🌑', ability: 'none' }
+        ];
 
-        // --- ИГРОК (ЧЕЛОВЕЧЕК) И МАГАЗИН ---
-        const player = {
-            x: 50, y: 300, w: 30, h: 40,
-            vx: 0, vy: 0,
-            health: 5, maxHealth: 5,
-            coins: 0,
-            speedMod: 1, slowTimer: 0,
-            isDead: false, respawnTimer: 0,
-            jumpCount: 0, maxJumps: 2, // Двойной прыжок
-            hasSword: false, hasShield: false, hasArmor: false, hasBow: false, hasBoots: false,
-            arrows: []
-        };
+        let playerData = { coins: 0, equippedSkin: 0, maxHealth: 5 };
+        let currentCostume = ALL_SKINS[0];
+        let isShieldActive = false;
 
-        // Покупки в магазине
-        window.buyItem = function(type) {
-            if(type === 'sword' && !player.hasSword && player.coins >= 10) { player.coins -= 10; player.hasSword = true; }
-            else if(type === 'shield' && !player.hasShield && player.coins >= 15) { player.coins -= 15; player.hasShield = true; }
-            else if(type === 'armor' && !player.hasArmor && player.coins >= 20) { player.coins -= 20; player.hasArmor = true; player.maxHealth = 7; player.health = 7; }
-            else if(type === 'bow' && !player.hasBow && player.coins >= 25) { player.coins -= 25; player.hasBow = true; }
-            else if(type === 'boots' && !player.hasBoots && player.coins >= 30) { player.coins -= 30; player.hasBoots = true; player.maxJumps = 3; }
-            else { return; }
-            updateHUD();
-        };
-
-        function toggleShop() {
-            if(shop.style.display === 'block') { shop.style.display = 'none'; }
-            else { shopCoins.innerText = "Монет: " + player.coins; shop.style.display = 'block'; }
+        // --- МЕНЮ (КАРТИНКА КАК В ИГРЕ) ---
+        function renderSkins() {
+            skinGrid.innerHTML = '';
+            ALL_SKINS.forEach((skin, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'skin-btn';
+                if (playerData.equippedSkin === index) btn.classList.add('equipped');
+                const prevCanvas = document.createElement('canvas');
+                prevCanvas.width = 50; prevCanvas.height = 60;
+                const pCtx = prevCanvas.getContext('2d');
+                drawCostumePreview(pCtx, 25, 30, skin);
+                
+                btn.innerHTML = `<div style="margin:0 auto 5px; border-radius:8px; overflow:hidden; width:50px; height:60px; border:1px solid #555;"></div>${skin.desc} ${skin.type}`;
+                btn.querySelector('div').appendChild(prevCanvas);
+                
+                btn.onclick = () => { playerData.equippedSkin = index; currentCostume = skin; renderSkins(); };
+                skinGrid.appendChild(btn);
+            });
+            menuCoins.innerText = playerData.coins;
         }
-        document.addEventListener('keydown', e => { if(e.key === 'm' || e.key === 'M') toggleShop(); });
 
         // --- УПРАВЛЕНИЕ ---
-        const keys = { left: false, right: false, jump: false, shoot: false };
+        const keys = { left: false, right: false }; let jumpsLeft = 2;
+        const setupTouch = (id, key) => {
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.addEventListener('touchstart', e => { e.preventDefault(); keys[key] = true; });
+            el.addEventListener('touchend', e => { e.preventDefault(); keys[key] = false; });
+            el.addEventListener('mousedown', e => { e.preventDefault(); keys[key] = true; });
+            el.addEventListener('mouseup', e => { e.preventDefault(); keys[key] = false; });
+        };
+        setupTouch('touch-left', 'left'); setupTouch('touch-right', 'right');
+        document.getElementById('touch-jump').addEventListener('touchstart', e => { e.preventDefault(); jumpAction(); });
+        document.getElementById('touch-jump').addEventListener('mousedown', e => { e.preventDefault(); jumpAction(); });
+
         canvas.addEventListener('contextmenu', e => e.preventDefault());
-        canvas.addEventListener('mousedown', e => { 
-            if(e.button === 0) keys.left = true; 
-            if(e.button === 2) keys.right = true; 
-        });
-        canvas.addEventListener('mouseup', e => { 
-            if(e.button === 0) keys.left = false; 
-            if(e.button === 2) keys.right = false; 
-        });
-        document.addEventListener('keydown', e => {
-            if(e.key === ' ') { e.preventDefault(); keys.jump = true; }
-            if(e.key === 'e' || e.key === 'E') { 
-                e.preventDefault(); 
-                if(player.hasBow && !player.isDead) shootArrow(); 
+        canvas.addEventListener('mousedown', e => { if(e.button === 0) keys.left = true; if(e.button === 2) keys.right = true; });
+        canvas.addEventListener('mouseup', e => { if(e.button === 0) keys.left = false; if(e.button === 2) keys.right = false; });
+        document.addEventListener('keydown', e => { if(e.key === ' ') { e.preventDefault(); jumpAction(); } });
+
+        function jumpAction() {
+            if(jumpsLeft > 0 && !player.isDead) {
+                let force = -13;
+                if(currentCostume.ability === 'superJump' && jumpsLeft === 1) force = -18;
+                player.vy = force; jumpsLeft--;
             }
-        });
-        document.addEventListener('keyup', e => { if(e.key === ' ') keys.jump = false; });
-
-        function shootArrow() {
-            player.arrows.push({ x: player.x + 25, y: player.y + 15, w: 15, h: 4, speed: 12 });
         }
 
-        // --- ФИЗИКА ---
-        const GRAVITY = 0.6;
-        const MOVE_SPEED = 5;
-        const JUMP_FORCE = -12;
-        const TRAMPOLINE_FORCE = -15;
+        // --- ИГРОК ---
+        const player = { x: 50, y: 480, w: 30, h: 42, vx: 0, vy: 0, speedMod: 1, slowTimer: 0, health: 5, isDead: false, respawnTimer: 0, isGrounded: true, walkCycle: 0 };
 
-        function pointInTriangle(px, py, x1, y1, x2, y2, x3, y3) {
-            const d1 = (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2);
-            const d2 = (px - x3) * (y2 - y3) - (x2 - x3) * (py - y3);
-            const d3 = (px - x1) * (y3 - y1) - (x3 - x1) * (py - y1);
-            const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-            const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-            return !(hasNeg && hasPos);
-        }
-
-        // --- ГЕНЕРАЦИЯ 1000 УРОВНЕЙ ---
+        // --- ГЕНЕРАЦИЯ УРОВНЕЙ (БОТЫ И МНОГО ПРЕПЯТСТВИЙ) ---
         let currentLevel = 0;
-        let levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 0 };
+        let levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 950 };
 
         function generateLevel(index) {
-            player.x = 50; player.y = 300; player.vx = 0; player.vy = 0; 
-            player.jumpCount = 0;
-            if(!player.isDead && !player.hasArmor) { player.health = 5; }
-            else if(!player.isDead && player.hasArmor) { player.health = 7; }
-            player.speedMod = 1; player.slowTimer = 0; player.isDead = false;
-            player.arrows = [];
+            player.x = 50; player.y = 480; player.vx = 0; player.vy = 0; 
+            player.health = playerData.maxHealth; player.isDead = false; jumpsLeft = 2; isShieldActive = false;
             updateHUD(); statusText.innerText = "Беги!";
-
-            levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 800 };
+            levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 950 };
             
-            // Шипы (Безопасная зона 130 пикселей)
-            let spikeX = 20;
-            while(spikeX < 780) {
-                if(spikeX < 130) { spikeX += 15; continue; }
-                if(Math.random() < 0.75) levelData.spikes.push({ x: spikeX, y: 365, w: 20, h: 20 });
-                spikeX += 30 + Math.random() * 35;
+            // МНОГО ШИПОВ (на расстоянии друг от друга)
+            for(let i=0; i<15; i++) {
+                let x = 130 + 40 + Math.random() * 780;
+                let isSafe = true;
+                for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
+                if(isSafe) levelData.spikes.push({ x: x, y: 565, w: 20, h: 20 });
             }
-
-            // Батуты
-            let trapX = 50;
-            while(trapX < 780) {
-                if(Math.random() < 0.2) levelData.trampolines.push({ x: trapX, y: 350, r: 15 });
-                trapX += 30 + Math.random() * 60;
+            // БАТУТЫ
+            for(let i=0; i<6; i++) {
+                let x = 60 + Math.random() * 850;
+                let isSafe = true;
+                for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
+                if(isSafe) levelData.trampolines.push({ x: x, y: 540, r: 15 });
             }
-
-            // Шестеренки
-            let gearX = 150;
-            while(gearX < 780) {
-                if(Math.random() < 0.25) levelData.gears.push({ x: gearX, y: 350, r: 18, angle: 0 });
-                gearX += 40 + Math.random() * 50;
+            // ШЕСТЕРЕНКИ
+            for(let i=0; i<5; i++) {
+                let x = 150 + Math.random() * 750;
+                let isSafe = true;
+                for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
+                for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 40) isSafe = false;
+                if(isSafe) levelData.gears.push({ x: x, y: 540, r: 18, angle: 0 });
             }
-
+            // МНОГО БОТОВ (Противники, которых можно убить прыжком)
+            for(let i=0; i<8; i++) {
+                let x = 150 + Math.random() * 750;
+                let isSafe = true;
+                for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
+                for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 40) isSafe = false;
+                for(let g of levelData.gears) if(Math.abs(g.x - x) < 40) isSafe = false;
+                if(isSafe) levelData.bots.push({ x: x, y: 535, w: 30, h: 30, alive: true, vx: 1 + Math.random() * 3 });
+            }
             // МОНЕТКИ
-            let coinX = 60;
-            while(coinX < 780) {
-                if(Math.random() < 0.3) levelData.coins.push({ x: coinX, y: 355, r: 8 });
-                coinX += 15 + Math.random() * 50;
+            for(let i=0; i<25; i++) {
+                let x = 40 + Math.random() * 880;
+                let isSafe = true;
+                for(let s of levelData.spikes) if(Math.abs(s.x - x) < 30) isSafe = false;
+                for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 30) isSafe = false;
+                for(let g of levelData.gears) if(Math.abs(g.x - x) < 30) isSafe = false;
+                for(let b of levelData.bots) if(Math.abs(b.x - x) < 30) isSafe = false;
+                if(isSafe) levelData.coins.push({ x: x, y: 545, r: 8 });
             }
-
-            // БОТЫ (Враги, ходят по земле)
-            let botX = 150;
-            while(botX < 780) {
-                if(Math.random() < 0.35) {
-                    levelData.bots.push({ 
-                        x: botX, y: 330, w: 30, h: 30, 
-                        vx: 1 + Math.random() * 2, 
-                        alive: true 
-                    });
-                    botX += 40;
-                }
-                botX += 60 + Math.random() * 80;
-            }
-
             lvlNum.innerText = index + 1;
         }
 
-        // --- ЛОГИКА ИГРЫ ---
-        function update() {
-            if(player.isDead) {
-                player.respawnTimer--;
-                if(player.respawnTimer <= 0) generateLevel(currentLevel);
-                return;
-            }
+        // --- ФИЗИКА И БОИ ---
+        const GRAVITY = 0.6; const MOVE_SPEED = 6; const TRAMPOLINE_FORCE = -15;
 
-            if(player.slowTimer > 0) { player.slowTimer--; if(player.slowTimer === 0) player.speedMod = 1; }
+        function update() {
+            if(player.isDead) { player.respawnTimer--; if(player.respawnTimer<=0) generateLevel(currentLevel); return; }
+            if(player.slowTimer > 0) { player.slowTimer--; if(player.slowTimer===0) player.speedMod = 1; }
 
             if(keys.left) player.vx = -MOVE_SPEED * player.speedMod;
             else if(keys.right) player.vx = MOVE_SPEED * player.speedMod;
             else player.vx *= 0.8;
 
-            // ДВОЙНОЙ ПРЫЖОК
-            if(keys.jump) {
-                if(player.jumpCount < player.maxJumps) {
-                    player.vy = player.hasBoots ? -16 : JUMP_FORCE; // Если куплены ботинки - прыжок выше
-                    player.jumpCount++;
-                    keys.jump = false; // Сбрасываем, чтобы не спамить
-                }
-            }
             player.vy += GRAVITY; if(player.vy > 20) player.vy = 20;
             player.x += player.vx; if(player.x < 0) player.x = 0;
 
-            // Земля и сброс прыжков
-            if(player.vy > 0 && player.y + player.h > 370) {
-                player.y = 370 - player.h; player.vy = 0; player.jumpCount = 0;
+            if(player.vy > 0 && player.y + player.h > 570) {
+                player.y = 570 - player.h; player.vy = 0; player.isGrounded = true; jumpsLeft = 2;
             }
             player.y += player.vy;
 
-            // ШИПЫ (Мгновенная смерть)
+            // Шипы (Смерть)
             for(let spike of levelData.spikes) {
-                const corners = [[player.x, player.y], [player.x+player.w, player.y], [player.x, player.y+player.h], [player.x+player.w, player.y+player.h]];
-                const tx = spike.x + 10, ty = spike.y - 20;
-                const t1 = [spike.x, spike.y], t2 = [spike.x + 20, spike.y], t3 = [tx, ty];
-                for(let c of corners) {
-                    if(pointInTriangle(c[0], c[1], t1[0], t1[1], t2[0], t2[1], t3[0], t3[1])) {
-                        player.isDead = true; player.respawnTimer = 40; statusText.innerText = "💀 Убит шипом!"; return;
-                    }
+                if(player.x + player.w > spike.x && player.x < spike.x+20 && player.y+player.h > spike.y-20 && player.y < spike.y) {
+                    if(currentCostume.ability === 'shield' && !isShieldActive) {
+                        isShieldActive = true; player.health -= 0; continue;
+                    } else { player.isDead = true; player.respawnTimer=40; return; }
                 }
             }
-
-            // БАТУТЫ
+            // Батуты
             for(let tramp of levelData.trampolines) {
-                const dx = (player.x + 15) - tramp.x, dy = (player.y + 20) - tramp.y;
-                if(Math.sqrt(dx*dx + dy*dy) < tramp.r + 15) { 
-                    player.vy = TRAMPOLINE_FORCE; 
-                    player.jumpCount = 0; // Сброс прыжков
-                    statusText.innerText = "🟡 Батут!"; 
+                if(Math.sqrt((player.x+15 - tramp.x)**2 + (player.y+20 - tramp.y)**2) < tramp.r+15) player.vy = TRAMPOLINE_FORCE;
+            }
+            // Шестеренки (Замедление и урон)
+            for(let i=levelData.gears.length-1; i>=0; i--) {
+                let g = levelData.gears[i]; g.angle += 0.15;
+                if(Math.sqrt((player.x+15 - g.x)**2 + (player.y+20 - g.y)**2) < g.r+15) {
+                    player.health -= 1; player.speedMod = 0.5; player.slowTimer = 120;
+                    if(player.health <= 0) { player.isDead=true; return; }
                 }
             }
-
-            // ШЕСТЕРЁНКИ + МЕЧ
-            for(let i = levelData.gears.length - 1; i >= 0; i--) {
-                let gear = levelData.gears[i];
-                gear.angle += 0.15;
-                const dx = (player.x + 15) - gear.x, dy = (player.y + 20) - gear.y;
-                
-                if(Math.sqrt(dx*dx + dy*dy) < gear.r + 15) {
-                    if(player.hasSword) {
-                        player.coins += 2; levelData.gears.splice(i, 1);
-                        updateHUD(); statusText.innerText = "🗡️ Сломал шестеренку!";
-                        continue;
-                    } else {
-                        let dmg = player.hasShield ? 0.5 : 1;
-                        player.health -= dmg; player.speedMod = 0.5; player.slowTimer = 120;
-                        hpNum.innerText = Math.floor(player.health); statusText.innerText = "⚙️ Замедлен!";
-                        if(player.health <= 0) { player.isDead = true; player.respawnTimer = 40; statusText.innerText = "💀 Смерть от шестеренки!"; return; }
-                    }
-                }
-            }
-
-            // МОНЕТКИ
-            for(let i = levelData.coins.length - 1; i >= 0; i--) {
-                let coin = levelData.coins[i];
-                const dx = (player.x + 15) - coin.x, dy = (player.y + 20) - coin.y;
-                if(Math.sqrt(dx*dx + dy*dy) < coin.r + 15) {
-                    player.coins += 1; levelData.coins.splice(i, 1); updateHUD();
-                }
-            }
-
-            // БОТЫ (Враги)
-            for(let i = levelData.bots.length - 1; i >= 0; i--) {
+            // БОТЫ (Убиваются прыжком сверху)
+            for(let i=levelData.bots.length-1; i>=0; i--) {
                 let bot = levelData.bots[i];
                 if(!bot.alive) continue;
-
-                // Движение ботов (вперёд-назад)
                 bot.x += bot.vx;
-                if(bot.x < 50 || bot.x > 770) bot.vx *= -1;
+                if(bot.x < 20 || bot.x > 980) bot.vx *= -1;
 
-                // Рисуем ботов (будет в draw), здесь только коллизия
-
-                // Проверка на удар сверху (игрок прыгает на бота)
-                if(player.vy > 0 && player.x + player.w > bot.x && player.x < bot.x + bot.w) {
-                    if(player.y + player.h > bot.y && player.y + player.h < bot.y + bot.h + 10) {
-                        bot.alive = false; // Убили бота
-                        player.coins += 5; // Бонус за бота
-                        player.vy = -8; // Отскок от бота
-                        updateHUD(); statusText.innerText = "💥 Убил бота!";
-                        continue;
-                    }
-                }
-                
-                // Проверка касания сбоку (игрок получает урон)
-                if(player.x + player.w > bot.x && player.x < bot.x + bot.w) {
-                    if(player.y + player.h > bot.y && player.y < bot.y + bot.h) {
-                        player.health -= 1;
-                        hpNum.innerText = Math.floor(player.health);
-                        // Отбрасываем игрока назад
-                        player.vx = (player.x < bot.x) ? -5 : 5;
-                        if(player.health <= 0) { player.isDead = true; player.respawnTimer = 40; statusText.innerText = "💀 Убит ботом!"; return; }
+                // Проверка столкновения
+                if(Math.abs((player.x + 15) - (bot.x + 15)) < 30 && Math.abs((player.y + 20) - (bot.y + 15)) < 30) {
+                    if(player.vy > 0 && player.y + player.h < bot.y + 10) {
+                        bot.alive = false;
+                        playerData.coins += 5;
+                        player.vy = -10; // Отскок
+                        statusText.innerText = "💥 Бот убит!";
+                        updateHUD();
+                    } else {
+                        player.isDead = true; player.respawnTimer=40; return;
                     }
                 }
             }
-
-            // СТРЕЛЫ
-            for(let i = player.arrows.length - 1; i >= 0; i--) {
-                let arrow = player.arrows[i];
-                arrow.x += arrow.speed;
-                if(arrow.x > 800) { player.arrows.splice(i, 1); continue; }
-                for(let j = levelData.spikes.length - 1; j >= 0; j--) {
-                    let spike = levelData.spikes[j];
-                    if(arrow.x + arrow.w > spike.x && arrow.x < spike.x + 20 && arrow.y + arrow.h > spike.y - 20 && arrow.y < spike.y) {
-                        player.coins += 1; levelData.spikes.splice(j, 1); player.arrows.splice(i, 1);
-                        updateHUD(); statusText.innerText = "🏹 Попал в шип!"; break;
-                    }
-                }
-            }
-
-            // 1000 УРОВНЕЙ
-            if(player.x > levelData.finishX - 20) {
-                currentLevel++;
-                if(currentLevel >= 1000) { alert("🎉 ТЫ ПРОШЕЛ 1000 УРОВНЕЙ! ТЫ ЛЕГЕНДА! 🎉"); currentLevel = 0; }
-                generateLevel(currentLevel);
-            }
-        }
-
-        function updateHUD() {
-            hpNum.innerText = Math.floor(player.health);
-            coinNum.innerText = player.coins;
-            shopCoins.innerText = "Монет: " + player.coins;
-        }
-
-        // --- ОТРИСОВКА ---
-        function draw() {
-            ctx.clearRect(0, 0, 800, 400);
-            const lvl = levelData;
-
-            ctx.fillStyle = "#8B4513"; ctx.fillRect(0, 370, 800, 30);
-
-            // Шипы
-            ctx.fillStyle = "#e74c3c"; ctx.strokeStyle = "#c0392b";
-            for(let s of lvl.spikes) {
-                ctx.beginPath(); ctx.moveTo(s.x + 10, s.y - 20); ctx.lineTo(s.x, s.y); ctx.lineTo(s.x+20, s.y); ctx.closePath(); ctx.fill(); ctx.stroke();
-            }
-
-            // Батуты
-            ctx.fillStyle = "#f1c40f"; ctx.strokeStyle = "#d4ac0d";
-            for(let t of lvl.trampolines) {
-                ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(t.x - 8, t.y - 5); ctx.lineTo(t.x + 8, t.y + 5); ctx.moveTo(t.x - 8, t.y + 5); ctx.lineTo(t.x + 8, t.y - 5); ctx.stroke();
-            }
-
-            // Шестеренки
-            ctx.fillStyle = "#7f8c8d"; ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 3;
-            for(let g of lvl.gears) {
-                ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(g.angle);
-                for(let i=0; i<10; i++) { ctx.rotate(Math.PI / 5); ctx.beginPath(); ctx.moveTo(g.r - 5, 0); ctx.lineTo(g.r + 5, 0); ctx.stroke(); }
-                ctx.beginPath(); ctx.arc(0, 0, g.r - 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.restore();
-            }
-
             // Монетки
-            ctx.fillStyle = "#ffd700"; ctx.strokeStyle = "#b8860b"; ctx.lineWidth = 2;
-            for(let c of lvl.coins) {
-                ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(c.x, c.y, 4, 0, Math.PI * 2); ctx.stroke();
+            for(let i=levelData.coins.length-1; i>=0; i--) {
+                let c = levelData.coins[i];
+                if(Math.sqrt((player.x+15 - c.x)**2 + (player.y+20 - c.y)**2) < c.r+15) {
+                    playerData.coins += 1; levelData.coins.splice(i,1); updateHUD();
+                }
             }
-
-            // БОТЫ (Зеленые кубики с глазами)
-            for(let b of lvl.bots) {
-                if(!b.alive) continue;
-                ctx.fillStyle = "#2ecc71"; ctx.strokeStyle = "#27ae60"; ctx.lineWidth = 2;
-                ctx.fillRect(b.x, b.y, b.w, b.h); ctx.strokeRect(b.x, b.y, b.w, b.h);
-                
-                // Глаза бота
-                ctx.fillStyle = "white";
-                ctx.beginPath(); ctx.arc(b.x + 8, b.y + 10, 6, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(b.x + 22, b.y + 10, 6, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = "black";
-                ctx.beginPath(); ctx.arc(b.x + 10, b.y + 12, 3, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(b.x + 24, b.y + 12, 3, 0, Math.PI * 2); ctx.fill();
+            // Переход уровня
+            if(player.x > levelData.finishX - 20) {
+                currentLevel++; if(currentLevel>=1000) { alert("1000 пройдено!"); currentLevel=0; } generateLevel(currentLevel);
             }
+        }
+        function updateHUD() { hpNum.innerText=player.health; coinNum.innerText=playerData.coins; menuCoins.innerText=playerData.coins; }
 
-            // Стрелы
-            ctx.fillStyle = "#8b4513"; ctx.strokeStyle = "#000";
-            for(let a of player.arrows) {
-                ctx.fillRect(a.x, a.y, 15, 4);
-                ctx.beginPath(); ctx.moveTo(a.x + 15, a.y + 2); ctx.lineTo(a.x + 20, a.y - 2); ctx.lineTo(a.x + 20, a.y + 6); ctx.closePath(); ctx.fill();
-            }
-
-            // ЧЕЛОВЕЧЕК
-            if(!player.isDead || Math.floor(player.respawnTimer / 10) % 2 === 0) {
-                ctx.fillStyle = playerColor; ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
-                ctx.fillRect(player.x + 8, player.y + 12, 14, 20);
-                ctx.strokeRect(player.x + 8, player.y + 12, 14, 20);
-                ctx.beginPath(); ctx.arc(player.x + 15, player.y + 8, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(player.x + 10, player.y + 32); ctx.lineTo(player.x + 8, player.y + 40); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(player.x + 20, player.y + 32); ctx.lineTo(player.x + 22, player.y + 40); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(player.x + 8, player.y + 15); ctx.lineTo(player.x + 2, player.y + 22); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(player.x + 22, player.y + 15); ctx.lineTo(player.x + 28, player.y + 22); ctx.stroke();
-
-                // КРУГЛЫЕ ГЛАЗА
-                ctx.fillStyle = "white"; ctx.strokeStyle = "black";
-                ctx.beginPath(); ctx.arc(player.x + 10, player.y + 6, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(player.x + 20, player.y + 6, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = "black";
-                ctx.beginPath(); ctx.arc(player.x + 11, player.y + 7, 2, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(player.x + 21, player.y + 7, 2, 0, Math.PI * 2); ctx.fill();
-
-                ctx.beginPath(); ctx.arc(player.x + 15, player.y + 12, 2, 0, Math.PI); ctx.stroke();
+        // --- РИСОВАНИЕ КОСТЮМОВ ---
+        function drawCostumePreview(pCtx, cx, cy, costume) {
+            const c = costume.color;
+            if(costume.type === 'Дракон') {
+                pCtx.fillStyle = c; pCtx.strokeStyle = "#222"; pCtx.lineWidth = 1.5;
+                pCtx.beginPath(); pCtx.arc(cx, cy+12, 14, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.fillRect(cx-20, cy+2, 10, 16); pCtx.fillRect(cx+10, cy+2, 10, 16);
+                pCtx.fillRect(cx-8, cy-8, 3, 6); pCtx.fillRect(cx+5, cy-8, 3, 6);
+                pCtx.beginPath(); pCtx.arc(cx-2, cy-4, 10, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.fillStyle = "white"; pCtx.beginPath(); pCtx.arc(cx-5, cy-6, 4, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.beginPath(); pCtx.arc(cx+3, cy-6, 4, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+            } else if(costume.type === 'Рыцарь') {
+                pCtx.fillStyle = c; pCtx.strokeStyle = "#222"; pCtx.lineWidth = 1.5;
+                pCtx.fillRect(cx-10, cy, 20, 25);
+                pCtx.fillRect(cx-8, cy-10, 16, 10);
+                pCtx.fillStyle = "#aaa"; pCtx.fillRect(cx-4, cy-7, 8, 4);
+                pCtx.fillRect(cx-12, cy+8, 4, 8); pCtx.fillRect(cx+8, cy+8, 4, 8);
+            } else if(costume.type === 'Маг') {
+                pCtx.fillStyle = c; pCtx.strokeStyle = "#222"; pCtx.lineWidth = 1.5;
+                pCtx.fillRect(cx-6, cy+8, 12, 18);
+                pCtx.beginPath(); pCtx.arc(cx, cy+4, 10, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.fillStyle = "#8b5cf6"; pCtx.fillRect(cx-12, cy+8, 4, 20);
+                pCtx.fillStyle = "white"; pCtx.beginPath(); pCtx.arc(cx-3, cy+3, 4, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.beginPath(); pCtx.arc(cx+5, cy+3, 4, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+            } else if(costume.type === 'Зомби') {
+                pCtx.fillStyle = c; pCtx.strokeStyle = "#222"; pCtx.lineWidth = 1.5;
+                pCtx.fillRect(cx-6, cy+8, 12, 18);
+                pCtx.beginPath(); pCtx.arc(cx, cy+4, 10, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.fillStyle = "#e0e0e0"; pCtx.fillRect(cx-4, cy-2, 8, 6);
+                pCtx.fillStyle = "white"; pCtx.beginPath(); pCtx.arc(cx-4, cy+2, 5, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.beginPath(); pCtx.arc(cx+4, cy+2, 5, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+            } else if(costume.type === 'Тень') {
+                pCtx.shadowColor = "#8b5cf6"; pCtx.shadowBlur = 15;
+                pCtx.fillStyle = "#000"; pCtx.strokeStyle = "#222"; pCtx.lineWidth = 1.5;
+                pCtx.fillRect(cx-6, cy+8, 12, 18); pCtx.beginPath(); pCtx.arc(cx, cy+4, 10, 0, Math.PI*2); pCtx.fill(); pCtx.stroke();
+                pCtx.shadowBlur = 0;
+                pCtx.fillStyle = "#8b5cf6"; pCtx.beginPath(); pCtx.arc(cx-3, cy+3, 3, 0, Math.PI*2); pCtx.fill();
+                pCtx.beginPath(); pCtx.arc(cx+5, cy+3, 3, 0, Math.PI*2); pCtx.fill();
             }
         }
 
-        // --- ГЛАВНЫЙ ЦИКЛ ---
-        startBtn.addEventListener('click', () => {
-            playerColor = colorPicker.value;
-            menu.style.display = 'none';
-            gameWrapper.style.display = 'block';
-            generateLevel(0);
-            updateHUD();
+        function drawHero(cx, cy, costume) {
+            const c = costume.color;
+            ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2;
+
+            if(costume.type === 'Дракон') {
+                ctx.fillStyle = c; 
+                ctx.beginPath(); ctx.arc(cx, cy+15, 22, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillRect(cx-32, cy+5, 16, 24); ctx.fillRect(cx+16, cy+5, 16, 24);
+                ctx.fillRect(cx-16, cy-12, 4, 8); ctx.fillRect(cx+12, cy-12, 4, 8);
+                ctx.beginPath(); ctx.arc(cx, cy-2, 16, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(cx-6, cy-4, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx+6, cy-4, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(cx-5, cy-3, 3, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx+7, cy-3, 3, 0, Math.PI*2); ctx.fill();
+            } else if(costume.type === 'Рыцарь') {
+                ctx.fillStyle = c; 
+                ctx.fillRect(cx-14, cy, 28, 38);
+                ctx.fillRect(cx-12, cy-14, 24, 14);
+                ctx.fillStyle = "#94a3b8"; ctx.fillRect(cx-6, cy-10, 12, 6);
+                ctx.fillRect(cx-18, cy+12, 6, 12); ctx.fillRect(cx+12, cy+12, 6, 12);
+                ctx.fillRect(cx+4, cy+5, 4, 20);
+            } else if(costume.type === 'Маг') {
+                ctx.fillStyle = c;
+                ctx.fillRect(cx-8, cy+10, 16, 22);
+                ctx.beginPath(); ctx.arc(cx, cy+4, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#8b5cf6"; ctx.fillRect(cx-16, cy+10, 6, 28);
+                ctx.fillRect(cx+10, cy+10, 6, 28);
+                ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(cx-5, cy+2, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx+5, cy+2, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(cx-4, cy+3, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx+6, cy+3, 2.5, 0, Math.PI*2); ctx.fill();
+            } else if(costume.type === 'Зомби') {
+                ctx.fillStyle = c;
+                ctx.fillRect(cx-8, cy+10, 16, 22);
+                ctx.beginPath(); ctx.arc(cx, cy+4, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#e0e0e0"; ctx.fillRect(cx-6, cy-4, 12, 8);
+                ctx.fillStyle = "white"; ctx.strokeStyle = "#0f172a";
+                ctx.beginPath(); ctx.arc(cx-5, cy+2, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx+5, cy+2, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(cx-4, cy+3, 3, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx+6, cy+3, 3, 0, Math.PI*2); ctx.fill();
+            } else if(costume.type === 'Тень') {
+                ctx.shadowColor = "#8b5cf6"; ctx.shadowBlur = 20;
+                ctx.fillStyle = "#000"; ctx.strokeStyle = "#000";
+                ctx.fillRect(cx-8, cy+10, 16, 22);
+                ctx.beginPath(); ctx.arc(cx, cy+4, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "#8b5cf6";
+                ctx.beginPath(); ctx.arc(cx-4, cy+2, 4, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx+4, cy+2, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "rgba(139, 92, 246, 0.3)";
+                ctx.beginPath(); ctx.arc(cx-4, cy+30, 6, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx+4, cy+30, 6, 0, Math.PI*2); ctx.fill();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, 1000, 600);
+            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, 1000, 600);
+            ctx.fillStyle = "#3e2723"; ctx.fillRect(0, 570, 1000, 30);
+
+            // Рисуем препятствия и ботов
+            for(let s of levelData.spikes) { ctx.fillStyle = "#dc2626"; ctx.beginPath(); ctx.moveTo(s.x+10, s.y-20); ctx.lineTo(s.x, s.y); ctx.lineTo(s.x+20, s.y); ctx.closePath(); ctx.fill(); }
+            for(let t of levelData.trampolines) { ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill(); }
+            for(let g of levelData.gears) { ctx.fillStyle = "#64748b"; ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(g.angle); for(let i=0; i<10; i++){ ctx.rotate(Math.PI/5); ctx.fillRect(g.r-6,-2,12,4); } ctx.beginPath(); ctx.arc(0,0,g.r-6,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+            
+            // Боты (красные и злые)
+            for(let b of levelData.bots) {
+                if(!b.alive) continue;
+                ctx.fillStyle = "#c0392b"; ctx.fillRect(b.x, b.y, 30, 30);
+                ctx.fillStyle = "#fff"; ctx.fillRect(b.x+5, b.y+5, 6, 6); ctx.fillRect(b.x+19, b.y+5, 6, 6);
+                ctx.fillStyle = "#000"; ctx.fillRect(b.x+8, b.y+8, 3, 3); ctx.fillRect(b.x+22, b.y+8, 3, 3);
+                ctx.fillStyle = "#fff"; ctx.fillRect(b.x+10, b.y+20, 10, 4);
+            }
+
+            for(let c of levelData.coins) { ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fill(); }
+
+            // Рисуем героя с костюмом
+            if(!player.isDead || player.respawnTimer%20<10) drawHero(player.x+15, player.y+2, currentCostume);
+        }
+
+        // --- ЗАПУСК ---
+        renderSkins();
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('gameWrapper').style.display = 'block';
+            generateLevel(0); updateHUD();
             function loop(){ update(); draw(); requestAnimationFrame(loop); }
             loop();
         });
