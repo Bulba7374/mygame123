@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Shadow Runner Pro</title>
     
     <!-- PWA Manifest для установки приложения -->
@@ -15,69 +15,74 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { 
             width: 100%; height: 100%; overflow: hidden; 
-            background: #0f172a; font-family: -apple-system, 'Segoe UI', sans-serif; 
+            background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             user-select: none; -webkit-user-select: none; touch-action: none; 
             position: fixed; top: 0; left: 0;
         }
         
         #menu {
-            position: absolute; inset: 0; margin: auto;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(30, 41, 59, 0.95); padding: 20px; border-radius: 25px; text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.9); color: white; z-index: 100; 
-            width: 90%; max-width: 450px; height: fit-content; max-height: 85vh; overflow-y: auto;
+            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
             border: 2px solid #facc15; backdrop-filter: blur(10px);
         }
-        #menu h1 { color: #facc15; font-size: 22px; margin: 0 0 8px 0; }
+        #menu h1 { color: #facc15; font-size: 24px; margin: 0 0 10px 0; }
         
-        .menu-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 5px; }
+        .menu-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 5px; }
         .menu-row .gold { color: #facc15; font-weight: bold; }
         
-        .skin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; }
+        .skin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 10px 0; }
         .skin-btn {
-            background: #1e293b; color: white; padding: 6px; border-radius: 10px; cursor: pointer;
-            border: 2px solid transparent; font-size: 10px; text-align: center; transition: 0.2s;
+            background: #1e293b; color: white; padding: 8px; border-radius: 12px; cursor: pointer;
+            border: 2px solid transparent; font-size: 11px; text-align: center; transition: 0.2s;
         }
-        .skin-btn.equipped { border-color: #facc15; background: #3b82f6; transform: scale(1.02); }
-        .skin-btn .preview { width: 100%; aspect-ratio: 1/1; border-radius: 6px; margin-bottom: 3px; background: #555; display: flex; align-items: center; justify-content: center; overflow: hidden;}
-        .skin-btn .preview canvas { width: 100%; height: 100%; display: block; }
+        .skin-btn.equipped { border-color: #facc15; background: #3b82f6; transform: scale(1.05); }
+        .skin-btn .preview { width: 100%; aspect-ratio: 1/1; border-radius: 8px; margin-bottom: 4px; background: #555; display: flex; align-items: center; justify-content: center; font-size: 20px;}
         
         .btn-primary {
-            background: #10b981; color: white; font-size: 17px; font-weight: bold;
+            background: #10b981; color: white; font-size: 18px; font-weight: bold;
             padding: 12px 0; border: none; border-radius: 25px; cursor: pointer;
             width: 100%; box-shadow: 0 4px 0 #059669; margin-top: 5px;
         }
-        .btn-secondary { background: #8b5cf6; color: white; padding: 6px 12px; border: none; border-radius: 15px; cursor: pointer; font-size: 11px; }
+        .btn-secondary { background: #8b5cf6; color: white; padding: 6px 12px; border: none; border-radius: 15px; cursor: pointer; font-size: 12px; }
         
         #gameWrapper { 
-            display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; 
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
             background: #1e293b; overflow: hidden; 
         }
-        #gc { display: block; width: 100vw; height: 100vh; background: #87CEEB; touch-action: none; }
+        #gc { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            background: #87CEEB; 
+            touch-action: none; 
+            object-fit: contain;
+        }
         
         #hud {
-            position: absolute; top: 1.5%; left: 0; width: 100%; display: flex; justify-content: space-between;
+            position: absolute; top: 1%; left: 0; width: 100%; display: flex; justify-content: space-between;
             padding: 0 8px; box-sizing: border-box; pointer-events: none; z-index: 10;
             flex-wrap: wrap; gap: 4px;
         }
         #hud span {
-            background: rgba(0,0,0,0.6); color: white; padding: 3px 10px; border-radius: 20px; 
+            background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; 
             font-weight: bold; font-size: 13px; pointer-events: auto; backdrop-filter: blur(4px);
-            white-space: nowrap;
         }
         #hud .shop-btn { background: #facc15; color: #000; cursor: pointer; }
         .gold { color: #facc15; } .red { color: #ef4444; }
 
-        /* Телефонные кнопки - В САМОМ НИЗУ */
+        /* Телефонные кнопки - в самом низу, не перекрывают игрока */
         @media (pointer: coarse) {
             #mobile-controls {
                 position: absolute; bottom: 2%; left: 0; width: 100%; display: flex; justify-content: space-between;
-                padding: 0 3%; box-sizing: border-box; z-index: 20; pointer-events: none;
+                padding: 0 5%; box-sizing: border-box; z-index: 20; pointer-events: none;
             }
             .ctrl-btn {
                 pointer-events: auto; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5);
-                border-radius: 50%; width: 55px; height: 55px; 
-                font-size: 18px; display: flex; align-items: center; justify-content: center; 
-                backdrop-filter: blur(6px); font-weight: bold; touch-action: manipulation;
+                border-radius: 50%; width: 70px; height: 70px; max-width: 15vw; max-height: 15vw;
+                font-size: 20px; display: flex; align-items: center; justify-content: center; 
+                backdrop-filter: blur(8px); font-weight: bold; touch-action: manipulation;
             }
             .ctrl-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
             .ctrl-jump { border-color: #facc15; background: rgba(250, 204, 21, 0.25); }
@@ -86,19 +91,18 @@
 
         /* Магазин внутри игры */
         #gameShop {
-            display: none; position: absolute; inset: 0; margin: auto;
-            background: rgba(0,0,0,0.85); padding: 15px; border-radius: 20px;
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); padding: 20px; border-radius: 20px;
             text-align: center; color: white; z-index: 30; 
-            width: 85%; max-width: 350px; height: fit-content; max-height: 80vh; overflow-y: auto;
+            width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;
             border: 2px solid #facc15; backdrop-filter: blur(10px);
         }
-        #gameShop h2 { color: #facc15; margin: 0 0 8px 0; font-size: 20px; }
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        #gameShop h2 { color: #facc15; margin: 0 0 10px 0; }
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .shop-item {
-            background: #1e293b; padding: 8px; border-radius: 10px; border: 1px solid #64748b;
-            font-size: 13px;
+            background: #1e293b; padding: 10px; border-radius: 10px; border: 1px solid #64748b;
         }
-        .shop-item button { background: #e67e22; border: none; padding: 4px 10px; color: white; border-radius: 5px; cursor: pointer; margin-top: 4px; font-weight: bold; font-size: 12px;}
+        .shop-item button { background: #e67e22; border: none; padding: 5px 10px; color: white; border-radius: 5px; cursor: pointer; margin-top: 5px; font-weight: bold;}
         .shop-item button:disabled { background: #555; cursor: not-allowed; }
     </style>
 </head>
@@ -112,23 +116,23 @@
             <button class="btn-secondary" onclick="toggleFullscreen()">⛑️ Экран</button>
         </div>
         
-        <div style="font-size:12px; color:#94a3b8; margin:4px 0;">Выбери костюм (Бесплатно):</div>
+        <div style="font-size:13px; color:#94a3b8; margin:5px 0;">Выбери костюм (Бесплатно):</div>
         <div class="skin-grid" id="skinGrid"></div>
         
         <button class="btn-primary" id="startBtn">ИГРАТЬ!</button>
-        <div style="font-size:10px; color:#64748b; margin-top:6px;">На ПК: ЛКМ=Назад, ПКМ=Вперёд, Пробел=Прыжок</div>
+        <div style="font-size:11px; color:#64748b; margin-top:8px;">На ПК: ЛКМ=Назад, ПКМ=Вперёд, Пробел=Прыжок</div>
     </div>
 
     <!-- МАГАЗИН В ИГРЕ -->
     <div id="gameShop">
-        <h2>🏪 Магазин <span id="shopCoins" class="gold" style="float:right;font-size:16px;">💰 0</span></h2>
+        <h2>🏪 Магазин <span id="shopCoins" class="gold" style="float:right;">💰 0</span></h2>
         <div class="shop-grid">
             <div class="shop-item"><b>🗡️ Меч</b><br><span class="gold">💰 15</span><br><button onclick="buyItem('sword')">Купить</button></div>
             <div class="shop-item"><b>🛡️ Щит</b><br><span class="gold">💰 20</span><br><button onclick="buyItem('shield')">Купить</button></div>
             <div class="shop-item"><b>🦺 Броня</b><br><span class="gold">💰 25</span><br><button onclick="buyItem('armor')">Купить</button></div>
             <div class="shop-item"><b>🏹 Лук</b><br><span class="gold">💰 30</span><br><button onclick="buyItem('bow')">Купить</button></div>
         </div>
-        <button class="btn-primary" style="background:#ef4444;box-shadow:0 4px 0 #b91c1c;margin-top:8px;" onclick="closeShop()">Закрыть</button>
+        <button class="btn-primary" style="background:#ef4444;box-shadow:0 4px 0 #b91c1c;margin-top:10px;" onclick="closeShop()">Закрыть магазин</button>
     </div>
 
     <!-- ИГРА -->
@@ -138,12 +142,12 @@
             <span>🌍 <span id="lvlNum" class="gold">1</span></span>
             <span>❤️ <span id="hpNum" class="red">5</span></span>
             <span>💰 <span id="coinNum" class="gold">0</span></span>
-            <span class="shop-btn" onclick="toggleInGameShop()">🏪</span>
-            <span id="statusText" style="max-width:50px;overflow:hidden;text-overflow:ellipsis;font-size:11px;">Беги!</span>
+            <span class="shop-btn" onclick="toggleInGameShop()">🏪 Магазин</span>
+            <span id="statusText">Беги!</span>
         </div>
         
         <div id="mobile-controls">
-            <div style="display:flex; gap:8px; pointer-events:none;">
+            <div style="display:flex; gap:10px; pointer-events:none;">
                 <div class="ctrl-btn" id="touch-left">◀</div>
                 <div class="ctrl-btn" id="touch-right">▶</div>
             </div>
@@ -152,35 +156,51 @@
     </div>
 
     <script>
-        // --- ИДЕАЛЬНАЯ НАСТРОЙКА КАНВАСА ПОД ЭКРАН ---
-        const canvas = document.getElementById('gc');
-        const ctx = canvas.getContext('2d');
-        
-        // Используем размеры окна для идеального заполнения
-        let W = window.innerWidth;
-        let H = window.innerHeight;
-        canvas.width = W;
-        canvas.height = H;
+        // --- ИНИЦИАЛИЗАЦИЯ РАЗМЕРОВ ---
+        function resizeCanvas() {
+            const wrapper = document.getElementById('gameWrapper');
+            const canvas = document.getElementById('gc');
+            // Устанавливаем фиксированное соотношение сторон 16:9 (широкий экран)
+            const ratio = 16 / 9;
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+            
+            if (w / h > ratio) {
+                // Экран слишком широкий
+                canvas.style.width = (h * ratio) + 'px';
+                canvas.style.height = h + 'px';
+            } else {
+                // Экран слишком высокий
+                canvas.style.width = w + 'px';
+                canvas.style.height = (w / ratio) + 'px';
+            }
+            // Внутреннее разрешение для отрисовки (фиксированное)
+            canvas.width = 1200;
+            canvas.height = 675;
+        }
 
-        // Переменные для логики (внутренние координаты)
-        const GAME_W = 1200;
-        const GAME_H = 700;
-        let scaleX = W / GAME_W;
-        let scaleY = H / GAME_H;
-
-        // --- ПОЛНОЭКРАННЫЙ ---
+        // --- ПОЛНОЭКРАННЫЙ РЕЖИМ (Работает на iPhone и Android) ---
         function toggleFullscreen() {
             const el = document.documentElement;
-            if (!document.fullscreenElement) {
-                if (el.requestFullscreen) el.requestFullscreen();
-                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (el.requestFullscreen) {
+                    el.requestFullscreen();
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                }
             } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
             }
         }
 
         // --- ДАННЫЕ ---
+        const canvas = document.getElementById('gc');
+        const ctx = canvas.getContext('2d');
+        
         const lvlNum = document.getElementById('lvlNum');
         const hpNum = document.getElementById('hpNum');
         const coinNum = document.getElementById('coinNum');
@@ -214,13 +234,7 @@
                 btn.className = 'skin-btn';
                 if (playerData.equippedSkin === index) btn.classList.add('equipped');
                 
-                const pCanvas = document.createElement('canvas');
-                pCanvas.width = 80; pCanvas.height = 80;
-                const pCtx = pCanvas.getContext('2d');
-                drawCostumePreview(pCtx, 40, 40, skin);
-                
-                btn.innerHTML = `<div class="preview"></div>${skin.emoji} ${skin.type}`;
-                btn.querySelector('.preview').appendChild(pCanvas);
+                btn.innerHTML = `<div class="preview" style="background:${skin.color}; display:flex; align-items:center; justify-content:center; font-size:24px;">${skin.emoji}</div>${skin.type}`;
                 
                 btn.onclick = () => { playerData.equippedSkin = index; currentCostume = skin; renderSkins(); };
                 skinGrid.appendChild(btn);
@@ -280,15 +294,15 @@
             }
         }
 
-        // --- ИГРОК И БОТЫ (внутренние координаты) ---
-        const player = { x: 50, y: 550, w: 30, h: 42, vx: 0, vy: 0, speedMod: 1, slowTimer: 0, health: 5, isDead: false, respawnTimer: 0, isGrounded: true };
+        // --- ИГРОК И БОТЫ ---
+        const player = { x: 50, y: 500, w: 30, h: 42, vx: 0, vy: 0, speedMod: 1, slowTimer: 0, health: 5, isDead: false, respawnTimer: 0, isGrounded: true };
 
         // --- ГЕНЕРАЦИЯ УРОВНЯ ---
         let currentLevel = 0;
         let levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1150 };
 
         function generateLevel(index) {
-            player.x = 50; player.y = 550; player.vx = 0; player.vy = 0; 
+            player.x = 50; player.y = 500; player.vx = 0; player.vy = 0; 
             player.health = playerData.maxHealth; player.isDead = false; jumpsLeft = 2; isShieldActive = false;
             updateHUD(); statusText.innerText = "Беги!";
             levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1150 };
@@ -410,26 +424,7 @@
             shopCoins.innerText = "💰 " + playerData.coins;
         }
 
-        // --- ПРЕВЬЮ И ОТРИСОВКА ---
-        function drawCostumePreview(pCtx, cx, cy, costume) {
-            const c = costume.color;
-            if(costume.type === 'Дракон') {
-                pCtx.fillStyle = c; pCtx.beginPath(); pCtx.arc(cx, cy+5, 14, 0, Math.PI*2); pCtx.fill();
-                pCtx.fillRect(cx-16, cy-5, 8, 14); pCtx.fillRect(cx+8, cy-5, 8, 14);
-                pCtx.fillRect(cx-6, cy-12, 3, 4); pCtx.fillRect(cx+3, cy-12, 3, 4);
-            } else if(costume.type === 'Тень') {
-                pCtx.shadowColor = "#8b5cf6"; pCtx.shadowBlur = 10;
-                pCtx.fillStyle = "#000"; pCtx.beginPath(); pCtx.arc(cx, cy, 14, 0, Math.PI*2); pCtx.fill();
-                pCtx.shadowBlur = 0;
-            } else {
-                pCtx.fillStyle = c; pCtx.fillRect(cx-6, cy+2, 12, 12);
-                pCtx.beginPath(); pCtx.arc(cx, cy-4, 10, 0, Math.PI*2); pCtx.fill();
-                if(costume.type === 'Маг') { pCtx.fillStyle = "#8b5cf6"; pCtx.fillRect(cx-10, cy+4, 4, 12); pCtx.fillRect(cx+6, cy+4, 4, 12); }
-                if(costume.type === 'Зомби') { pCtx.fillStyle = "#e0e0e0"; pCtx.fillRect(cx-4, cy-8, 8, 4); }
-                if(costume.type === 'Рыцарь') { pCtx.fillStyle = "#94a3b8"; pCtx.fillRect(cx-3, cy-8, 6, 3); }
-            }
-        }
-
+        // --- ОТРИСОВКА ---
         function drawHero(cx, cy, costume) {
             const c = costume.color;
             ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2;
@@ -468,12 +463,9 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, W, H);
-            ctx.save();
-            ctx.scale(scaleX, scaleY); // Масштабируем всё под экран
-            
-            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, GAME_W, GAME_H);
-            ctx.fillStyle = "#3e2723"; ctx.fillRect(0, 670, GAME_W, 30);
+            ctx.clearRect(0, 0, 1200, 675);
+            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, 1200, 675);
+            ctx.fillStyle = "#3e2723"; ctx.fillRect(0, 670, 1200, 30);
 
             for(let s of levelData.spikes) { ctx.fillStyle = "#dc2626"; ctx.beginPath(); ctx.moveTo(s.x+10, s.y-20); ctx.lineTo(s.x, s.y); ctx.lineTo(s.x+20, s.y); ctx.closePath(); ctx.fill(); }
             for(let t of levelData.trampolines) { ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill(); }
@@ -487,25 +479,20 @@
             for(let c of levelData.coins) { ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fill(); }
 
             if(!player.isDead || player.respawnTimer%20<10) drawHero(player.x+15, player.y+2, currentCostume);
-            
-            ctx.restore();
         }
 
         // --- ЗАПУСК ---
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
         renderSkins();
+        
         document.getElementById('startBtn').addEventListener('click', () => {
             document.getElementById('menu').style.display = 'none';
             document.getElementById('gameWrapper').style.display = 'block';
+            resizeCanvas(); // Пересчет размеров при старте
             generateLevel(0); updateHUD();
             function loop(){ update(); draw(); requestAnimationFrame(loop); }
             loop();
-        });
-        
-        // Пересчет размеров при повороте экрана
-        window.addEventListener('resize', () => {
-            W = window.innerWidth; H = window.innerHeight;
-            canvas.width = W; canvas.height = H;
-            scaleX = W / GAME_W; scaleY = H / GAME_H;
         });
     </script>
 </body>
