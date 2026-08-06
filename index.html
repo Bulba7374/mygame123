@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Shadow Runner Pro</title>
@@ -44,6 +44,7 @@
             width: 100%; box-shadow: 0 4px 0 #059669; margin-top: 5px;
         }
         .btn-secondary { background: #8b5cf6; color: white; padding: 6px 12px; border: none; border-radius: 15px; cursor: pointer; font-size: 12px; }
+        .btn-fullscreen { background: #3b82f6; color: white; padding: 6px 12px; border: none; border-radius: 15px; cursor: pointer; font-size: 12px; }
         
         #gameWrapper { 
             display: none; position: absolute; inset: 0; width: 100vw; height: 100vh; 
@@ -104,7 +105,7 @@
         <h1>⚡ SHADOW RUNNER ⚡</h1>
         <div class="menu-row">
             <div>💰 Монет: <span id="menuCoins" class="gold">0</span></div>
-            <button class="btn-secondary" onclick="toggleFullscreen()">⛑️ Экран</button>
+            <button class="btn-fullscreen" onclick="toggleFullscreen()">⛑️ Экран</button>
         </div>
         
         <div style="font-size:13px; color:#94a3b8; margin:5px 0;">Выбери костюм (Бесплатно):</div>
@@ -147,15 +148,24 @@
     </div>
 
     <script>
-        // --- ПОЛНОЭКРАННЫЙ ---
+        // --- ПОЛНОЭКРАННЫЙ (РАБОТАЕТ НА ТЕЛЕФОНЕ) ---
         function toggleFullscreen() {
             const el = document.documentElement;
             if (!document.fullscreenElement) {
-                if (el.requestFullscreen) el.requestFullscreen();
-                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                // Пытаемся открыть полноэкранный режим для всех браузеров
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(err => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                }
             } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
             }
         }
 
@@ -275,9 +285,9 @@
             updateHUD(); statusText.innerText = "Беги!";
             levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1150 };
 
-            // ШИПЫ
+            // ШИПЫ (очень много, но на расстоянии друг от друга)
             let prevX = 0;
-            for(let i=0; i<15; i++) {
+            for(let i=0; i<18; i++) {
                 let x = 130 + 40 + Math.random() * 980;
                 if(Math.abs(x - prevX) > 60) {
                     levelData.spikes.push({ x: x, y: 665, w: 20, h: 20 });
@@ -285,22 +295,22 @@
                 }
             }
             // БАТУТЫ
-            for(let i=0; i<6; i++) {
+            for(let i=0; i<7; i++) {
                 let x = 80 + Math.random() * 1000;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
                 if(isSafe) levelData.trampolines.push({ x: x, y: 640, r: 15 });
             }
             // ШЕСТЕРЕНКИ
-            for(let i=0; i<4; i++) {
+            for(let i=0; i<5; i++) {
                 let x = 150 + Math.random() * 900;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
                 for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 40) isSafe = false;
                 if(isSafe) levelData.gears.push({ x: x, y: 640, r: 18, angle: 0 });
             }
-            // БОТЫ
-            for(let i=0; i<10; i++) {
+            // БОТЫ (много, убиваются прыжком)
+            for(let i=0; i<12; i++) {
                 let x = 160 + Math.random() * 900;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
@@ -309,7 +319,7 @@
                 if(isSafe) levelData.bots.push({ x: x, y: 620, w: 30, h: 30, alive: true, vx: 1.5 + Math.random() * 3 });
             }
             // МОНЕТКИ
-            for(let i=0; i<25; i++) {
+            for(let i=0; i<30; i++) {
                 let x = 40 + Math.random() * 1080;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 30) isSafe = false;
@@ -340,7 +350,7 @@
             }
             player.y += player.vy;
 
-            // ШИПЫ
+            // ШИПЫ (Мгновенная смерть)
             for(let spike of levelData.spikes) {
                 if(player.x + player.w > spike.x && player.x < spike.x+20 && player.y+player.h > spike.y-20 && player.y < spike.y) {
                     if(currentCostume.ability === 'shield' && !isShieldActive) {
@@ -352,7 +362,7 @@
             for(let tramp of levelData.trampolines) {
                 if(Math.sqrt((player.x+15 - tramp.x)**2 + (player.y+20 - tramp.y)**2) < tramp.r+15) player.vy = TRAMPOLINE_FORCE;
             }
-            // ШЕСТЕРЕНКИ
+            // ШЕСТЕРЕНКИ (Урон + Замедление)
             for(let i=levelData.gears.length-1; i>=0; i--) {
                 let g = levelData.gears[i]; g.angle += 0.15;
                 if(Math.sqrt((player.x+15 - g.x)**2 + (player.y+20 - g.y)**2) < g.r+15) {
@@ -360,7 +370,7 @@
                     if(player.health <= 0) { player.isDead=true; return; }
                 }
             }
-            // БОТЫ (Убиваются прыжком)
+            // БОТЫ (Убиваются прыжком на голову)
             for(let i=levelData.bots.length-1; i>=0; i--) {
                 let bot = levelData.bots[i];
                 if(!bot.alive) continue;
