@@ -1,26 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Epic Shadow Runner</title>
+    <title>Shadow Runner Pro</title>
     
-    <!-- PWA Manifest для установки приложения (без интернета) -->
+    <!-- PWA Manifest для установки приложения -->
     <link rel="manifest" href='data:application/json,{"name":"Shadow Runner","short_name":"Runner","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#facc15","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%230f172a%22/%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2230%22 fill=%22%23facc15%22/%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
     
     <style>
-        /* Сбрасываем отступы для полного захвата экрана */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #0f172a; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; user-select: none; overflow: hidden; touch-action: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            width: 100%; height: 100%; overflow: hidden; 
+            background: #0f172a; font-family: 'Segoe UI', sans-serif; 
+            user-select: none; -webkit-user-select: none; touch-action: none; 
+        }
         
         #menu {
-            position: absolute; background: rgba(30, 41, 59, 0.95); padding: 15px; border-radius: 25px; text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.9); color: white; z-index: 100; width: 90%; max-width: 500px;
-            border: 2px solid #facc15; max-height: 90vh; overflow-y: auto; backdrop-filter: blur(10px);
+            position: absolute; inset: 0; margin: auto;
+            background: rgba(30, 41, 59, 0.95); padding: 20px; border-radius: 25px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9); color: white; z-index: 100; 
+            width: 90%; max-width: 500px; height: fit-content; max-height: 90vh; overflow-y: auto;
+            border: 2px solid #facc15; backdrop-filter: blur(10px);
         }
-        #menu h1 { color: #facc15; font-size: 24px; margin-top: 0; }
+        #menu h1 { color: #facc15; font-size: 24px; margin: 0 0 10px 0; }
+        
+        .menu-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 5px; }
+        .menu-row .gold { color: #facc15; font-weight: bold; }
         
         .skin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 10px 0; }
         .skin-btn {
@@ -28,51 +36,74 @@
             border: 2px solid transparent; font-size: 11px; text-align: center; transition: 0.2s;
         }
         .skin-btn.equipped { border-color: #facc15; background: #3b82f6; transform: scale(1.05); }
+        .skin-btn .preview { width: 100%; aspect-ratio: 1/1; border-radius: 8px; margin-bottom: 4px; background: #555; display: flex; align-items: center; justify-content: center; font-size: 20px;}
         
         .btn-primary {
             background: #10b981; color: white; font-size: 18px; font-weight: bold;
-            padding: 12px 30px; border: none; border-radius: 25px; cursor: pointer;
-            margin: 5px 0; width: 100%; box-shadow: 0 4px 0 #059669;
+            padding: 12px 0; border: none; border-radius: 25px; cursor: pointer;
+            width: 100%; box-shadow: 0 4px 0 #059669; margin-top: 5px;
         }
-        .btn-secondary { background: #8b5cf6; color: white; padding: 8px 15px; border: none; border-radius: 15px; cursor: pointer; font-size: 12px; }
+        .btn-secondary { background: #8b5cf6; color: white; padding: 6px 12px; border: none; border-radius: 15px; cursor: pointer; font-size: 12px; }
         
-        #gameWrapper { display: none; background: #1e293b; padding: 5px; border-radius: 15px; position: relative; width: 100vw; height: 100vh; max-width: 100%; max-height: 100%; box-sizing: border-box; }
-        canvas { display: block; width: 100%; height: 100%; touch-action: none; background: #87CEEB; object-fit: contain; }
+        #gameWrapper { 
+            display: none; position: absolute; inset: 0; width: 100vw; height: 100vh; 
+            background: #1e293b; overflow: hidden; 
+        }
+        #gc { display: block; width: 100%; height: 100%; background: #87CEEB; touch-action: none; }
         
         #hud {
             position: absolute; top: 2%; left: 0; width: 100%; display: flex; justify-content: space-between;
-            padding: 0 2%; box-sizing: border-box; pointer-events: none; z-index: 10;
+            padding: 0 10px; box-sizing: border-box; pointer-events: none; z-index: 10;
+            flex-wrap: wrap; gap: 5px;
         }
         #hud span {
             background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 20px; 
-            font-weight: bold; font-size: 12px; pointer-events: auto; backdrop-filter: blur(4px);
+            font-weight: bold; font-size: 14px; pointer-events: auto; backdrop-filter: blur(4px);
         }
+        #hud .shop-btn { background: #facc15; color: #000; cursor: pointer; }
         .gold { color: #facc15; } .red { color: #ef4444; }
 
-        /* Кнопки только на телефоне/планшете. В САМОМ НИЗУ */
+        /* Телефонные кнопки (только для сенсора) - В САМОМ НИЗУ */
         @media (pointer: coarse) {
             #mobile-controls {
-                position: absolute; bottom: 3%; left: 0; width: 100%; display: flex; justify-content: space-between;
-                padding: 0 3%; box-sizing: border-box; z-index: 20; pointer-events: none;
+                position: absolute; bottom: 15px; left: 0; width: 100%; display: flex; justify-content: space-between;
+                padding: 0 15px; box-sizing: border-box; z-index: 20; pointer-events: none;
             }
             .ctrl-btn {
-                pointer-events: auto; background: rgba(255,255,255,0.15); color: white; border: 2px solid rgba(255,255,255,0.4);
-                border-radius: 50%; width: 15vw; height: 15vw; max-width: 65px; max-height: 65px;
-                font-size: 14px; display: flex; align-items: center; justify-content: center; 
-                backdrop-filter: blur(6px); font-weight: bold;
+                pointer-events: auto; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5);
+                border-radius: 50%; width: 70px; height: 70px; max-width: 20vw; max-height: 20vw;
+                font-size: 20px; display: flex; align-items: center; justify-content: center; 
+                backdrop-filter: blur(8px); font-weight: bold; touch-action: manipulation;
             }
-            .ctrl-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
-            .ctrl-jump { border-color: #facc15; background: rgba(250, 204, 21, 0.2); }
+            .ctrl-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+            .ctrl-jump { border-color: #facc15; background: rgba(250, 204, 21, 0.25); }
         }
         @media (pointer: fine) { #mobile-controls { display: none !important; } }
+
+        /* Магазин внутри игры */
+        #gameShop {
+            display: none; position: absolute; inset: 0; margin: auto;
+            background: rgba(0,0,0,0.85); padding: 20px; border-radius: 20px;
+            text-align: center; color: white; z-index: 30; 
+            width: 90%; max-width: 400px; height: fit-content; max-height: 80vh; overflow-y: auto;
+            border: 2px solid #facc15; backdrop-filter: blur(10px);
+        }
+        #gameShop h2 { color: #facc15; margin: 0 0 10px 0; }
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .shop-item {
+            background: #1e293b; padding: 10px; border-radius: 10px; border: 1px solid #64748b;
+        }
+        .shop-item button { background: #e67e22; border: none; padding: 5px 10px; color: white; border-radius: 5px; cursor: pointer; margin-top: 5px; font-weight: bold;}
+        .shop-item button:disabled { background: #555; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
+    <!-- МЕНЮ -->
     <div id="menu">
         <h1>⚡ SHADOW RUNNER ⚡</h1>
-        <div style="margin-bottom:10px;">
-            <span>💰 Монет: <span id="menuCoins" class="gold">0</span></span>
+        <div class="menu-row">
+            <div>💰 Монет: <span id="menuCoins" class="gold">0</span></div>
             <button class="btn-secondary" onclick="toggleFullscreen()">⛑️ Экран</button>
         </div>
         
@@ -83,12 +114,26 @@
         <div style="font-size:11px; color:#64748b; margin-top:8px;">На ПК: ЛКМ=Назад, ПКМ=Вперёд, Пробел=Прыжок</div>
     </div>
 
+    <!-- МАГАЗИН В ИГРЕ -->
+    <div id="gameShop">
+        <h2>🏪 Магазин <span id="shopCoins" class="gold" style="float:right;">💰 0</span></h2>
+        <div class="shop-grid">
+            <div class="shop-item"><b>🗡️ Меч</b><br><span class="gold">💰 15</span><br><button onclick="buyItem('sword')">Купить</button></div>
+            <div class="shop-item"><b>🛡️ Щит</b><br><span class="gold">💰 20</span><br><button onclick="buyItem('shield')">Купить</button></div>
+            <div class="shop-item"><b>🦺 Броня</b><br><span class="gold">💰 25</span><br><button onclick="buyItem('armor')">Купить</button></div>
+            <div class="shop-item"><b>🏹 Лук</b><br><span class="gold">💰 30</span><br><button onclick="buyItem('bow')">Купить</button></div>
+        </div>
+        <button class="btn-primary" style="background:#ef4444;box-shadow:0 4px 0 #b91c1c;margin-top:10px;" onclick="closeShop()">Закрыть магазин</button>
+    </div>
+
+    <!-- ИГРА -->
     <div id="gameWrapper">
-        <canvas id="gc" width="1400" height="800"></canvas>
+        <canvas id="gc" width="1200" height="700"></canvas>
         <div id="hud">
             <span>🌍 <span id="lvlNum" class="gold">1</span></span>
             <span>❤️ <span id="hpNum" class="red">5</span></span>
             <span>💰 <span id="coinNum" class="gold">0</span></span>
+            <span class="shop-btn" onclick="toggleInGameShop()">🏪 Магазин</span>
             <span id="statusText">Беги!</span>
         </div>
         
@@ -102,7 +147,7 @@
     </div>
 
     <script>
-        // --- ПОЛНОЭКРАННЫЙ РЕЖИМ ---
+        // --- ПОЛНОЭКРАННЫЙ ---
         function toggleFullscreen() {
             const el = document.documentElement;
             if (!document.fullscreenElement) {
@@ -114,10 +159,9 @@
             }
         }
 
-        // --- ДАННЫЕ ИГРЫ ---
+        // --- ДАННЫЕ ---
         const canvas = document.getElementById('gc');
         const ctx = canvas.getContext('2d');
-        canvas.width = 1400; canvas.height = 800;
         
         const lvlNum = document.getElementById('lvlNum');
         const hpNum = document.getElementById('hpNum');
@@ -125,35 +169,69 @@
         const statusText = document.getElementById('statusText');
         const skinGrid = document.getElementById('skinGrid');
         const menuCoins = document.getElementById('menuCoins');
+        const shopCoins = document.getElementById('shopCoins');
 
-        // --- 5 КОСТЮМОВ С ТРАНСФОРМАЦИЕЙ ---
+        // --- ДАННЫЕ ИГРОКА ---
+        let playerData = { 
+            coins: 0, equippedSkin: 0, maxHealth: 5, 
+            hasSword: false, hasShield: false, hasArmor: false, hasBow: false 
+        };
+        
+        // --- 5 КОСТЮМОВ С ПРЕВЬЮ ---
         const COSTUMES = [
-            { id: 0, type: 'Рыцарь', color: '#7f8c8d', desc: '⚔️', ability: 'shield' },
-            { id: 1, type: 'Дракон', color: '#e74c3c', desc: '🐉', ability: 'superJump' },
-            { id: 2, type: 'Маг', color: '#8e44ad', desc: '🧙', ability: 'none' },
-            { id: 3, type: 'Зомби', color: '#27ae60', desc: '🧟', ability: 'none' },
-            { id: 4, type: 'Тень', color: '#0f172a', desc: '🌑', ability: 'none' }
+            { id: 0, type: 'Рыцарь', color: '#7f8c8d', emoji: '⚔️', ability: 'shield' },
+            { id: 1, type: 'Дракон', color: '#e74c3c', emoji: '🐉', ability: 'superJump' },
+            { id: 2, type: 'Маг', color: '#8e44ad', emoji: '🧙', ability: 'none' },
+            { id: 3, type: 'Зомби', color: '#27ae60', emoji: '🧟', ability: 'none' },
+            { id: 4, type: 'Тень', color: '#0f172a', emoji: '🌑', ability: 'none' }
         ];
-
-        let playerData = { coins: 0, equippedSkin: 0, maxHealth: 5, hasSword:false, hasShield:false, hasArmor:false, hasBow:false };
         let currentCostume = COSTUMES[0];
         let isShieldActive = false;
 
-        // --- МЕНЮ С ПРЕВЬЮ ---
+        // --- МЕНЮ ---
         function renderSkins() {
             skinGrid.innerHTML = '';
             COSTUMES.forEach((skin, index) => {
                 const btn = document.createElement('div');
                 btn.className = 'skin-btn';
                 if (playerData.equippedSkin === index) btn.classList.add('equipped');
-                btn.innerHTML = `<div style="width:30px;height:30px;margin:0 auto 3px;background:${skin.color};border-radius:8px;border:1px solid #555;display:flex;align-items:center;justify-content:center;font-size:14px;">${skin.desc}</div>${skin.type}`;
+                // Отрисовка превью как в игре
+                const pCanvas = document.createElement('canvas');
+                pCanvas.width = 50; pCanvas.height = 50;
+                const pCtx = pCanvas.getContext('2d');
+                drawCostumePreview(pCtx, 25, 25, skin);
+                
+                btn.innerHTML = `<div class="preview" style="background:${skin.color};"></div>${skin.emoji} ${skin.type}`;
+                btn.querySelector('.preview').appendChild(pCanvas);
+                
                 btn.onclick = () => { playerData.equippedSkin = index; currentCostume = skin; renderSkins(); };
                 skinGrid.appendChild(btn);
             });
             menuCoins.innerText = playerData.coins;
         }
 
-        // --- УПРАВЛЕНИЕ (Клавиатура, Мышь, Сенсор) ---
+        // --- МАГАЗИН ---
+        function toggleInGameShop() {
+            const shop = document.getElementById('gameShop');
+            if(shop.style.display === 'block') shop.style.display = 'none';
+            else { shopCoins.innerText = "💰 " + playerData.coins; shop.style.display = 'block'; }
+        }
+        function closeShop() { document.getElementById('gameShop').style.display = 'none'; }
+        
+        window.buyItem = function(type) {
+            if(type === 'sword' && !playerData.hasSword && playerData.coins >= 15) {
+                playerData.coins -= 15; playerData.hasSword = true;
+            } else if(type === 'shield' && !playerData.hasShield && playerData.coins >= 20) {
+                playerData.coins -= 20; playerData.hasShield = true;
+            } else if(type === 'armor' && !playerData.hasArmor && playerData.coins >= 25) {
+                playerData.coins -= 25; playerData.hasArmor = true; playerData.maxHealth += 2;
+            } else if(type === 'bow' && !playerData.hasBow && playerData.coins >= 30) {
+                playerData.coins -= 30; playerData.hasBow = true;
+            } else return;
+            updateHUD(); shopCoins.innerText = "💰 " + playerData.coins;
+        };
+
+        // --- УПРАВЛЕНИЕ ---
         const keys = { left: false, right: false };
         let jumpsLeft = 2;
 
@@ -174,76 +252,77 @@
         canvas.addEventListener('mousedown', e => { if(e.button === 0) keys.left = true; if(e.button === 2) keys.right = true; });
         canvas.addEventListener('mouseup', e => { if(e.button === 0) keys.left = false; if(e.button === 2) keys.right = false; });
         document.addEventListener('keydown', e => { if(e.key === ' ') { e.preventDefault(); jumpAction(); } });
+        document.addEventListener('keydown', e => { if(e.key === 'm' || e.key === 'M') toggleInGameShop(); });
 
         function jumpAction() {
             if(jumpsLeft > 0 && !player.isDead) {
                 let force = -14;
-                if(currentCostume.ability === 'superJump' && jumpsLeft === 1) force = -20;
+                if(currentCostume.ability === 'superJump' && jumpsLeft === 1) force = -22;
                 player.vy = force; jumpsLeft--;
             }
         }
 
         // --- ИГРОК И БОТЫ ---
-        const player = { x: 50, y: 650, w: 30, h: 42, vx: 0, vy: 0, speedMod: 1, slowTimer: 0, health: 5, isDead: false, respawnTimer: 0, isGrounded: true };
+        const player = { x: 50, y: 550, w: 30, h: 42, vx: 0, vy: 0, speedMod: 1, slowTimer: 0, health: 5, isDead: false, respawnTimer: 0, isGrounded: true };
 
-        // --- ГЕНЕРАЦИЯ УРОВНЯ (Максимум врагов и препятствий) ---
+        // --- ГЕНЕРАЦИЯ УРОВНЯ ---
         let currentLevel = 0;
-        let levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1350 };
+        let levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1150 };
 
         function generateLevel(index) {
-            player.x = 50; player.y = 650; player.vx = 0; player.vy = 0; 
+            player.x = 50; player.y = 550; player.vx = 0; player.vy = 0; 
             player.health = playerData.maxHealth; player.isDead = false; jumpsLeft = 2; isShieldActive = false;
             updateHUD(); statusText.innerText = "Беги!";
-            levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1350 };
+            levelData = { spikes: [], trampolines: [], gears: [], coins: [], bots: [], finishX: 1150 };
 
+            // ШИПЫ
             let prevX = 0;
-            // Много шипов
-            for(let i=0; i<18; i++) {
-                let x = 140 + 40 + Math.random() * 1150;
+            for(let i=0; i<15; i++) {
+                let x = 130 + 40 + Math.random() * 980;
                 if(Math.abs(x - prevX) > 60) {
-                    levelData.spikes.push({ x: x, y: 765, w: 20, h: 20 });
+                    levelData.spikes.push({ x: x, y: 665, w: 20, h: 20 });
                     prevX = x;
                 }
             }
-            // Батуты
-            for(let i=0; i<7; i++) {
-                let x = 80 + Math.random() * 1200;
+            // БАТУТЫ
+            for(let i=0; i<6; i++) {
+                let x = 80 + Math.random() * 1000;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
-                if(isSafe) levelData.trampolines.push({ x: x, y: 740, r: 15 });
+                if(isSafe) levelData.trampolines.push({ x: x, y: 640, r: 15 });
             }
-            // Шестеренки
-            for(let i=0; i<5; i++) {
-                let x = 150 + Math.random() * 1100;
+            // ШЕСТЕРЕНКИ
+            for(let i=0; i<4; i++) {
+                let x = 150 + Math.random() * 900;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
                 for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 40) isSafe = false;
-                if(isSafe) levelData.gears.push({ x: x, y: 740, r: 18, angle: 0 });
+                if(isSafe) levelData.gears.push({ x: x, y: 640, r: 18, angle: 0 });
             }
-            // Много ботов (до 10)
+            // БОТЫ
             for(let i=0; i<10; i++) {
-                let x = 180 + Math.random() * 1100;
+                let x = 160 + Math.random() * 900;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 40) isSafe = false;
                 for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 40) isSafe = false;
                 for(let g of levelData.gears) if(Math.abs(g.x - x) < 40) isSafe = false;
-                if(isSafe) levelData.bots.push({ x: x, y: 720, w: 30, h: 30, alive: true, vx: 2 + Math.random() * 4 });
+                if(isSafe) levelData.bots.push({ x: x, y: 620, w: 30, h: 30, alive: true, vx: 1.5 + Math.random() * 3 });
             }
-            // Монетки
-            for(let i=0; i<30; i++) {
-                let x = 40 + Math.random() * 1280;
+            // МОНЕТКИ
+            for(let i=0; i<25; i++) {
+                let x = 40 + Math.random() * 1080;
                 let isSafe = true;
                 for(let s of levelData.spikes) if(Math.abs(s.x - x) < 30) isSafe = false;
                 for(let t of levelData.trampolines) if(Math.abs(t.x - x) < 30) isSafe = false;
                 for(let g of levelData.gears) if(Math.abs(g.x - x) < 30) isSafe = false;
                 for(let b of levelData.bots) if(Math.abs(b.x - x) < 30) isSafe = false;
-                if(isSafe) levelData.coins.push({ x: x, y: 745, r: 8 });
+                if(isSafe) levelData.coins.push({ x: x, y: 645, r: 8 });
             }
             lvlNum.innerText = index + 1;
         }
 
-        // --- ФИЗИКА И ЛОГИКА ---
-        const GRAVITY = 0.7; const MOVE_SPEED = 7; const TRAMPOLINE_FORCE = -16;
+        // --- ФИЗИКА ---
+        const GRAVITY = 0.65; const MOVE_SPEED = 7; const TRAMPOLINE_FORCE = -16;
 
         function update() {
             if(player.isDead) { player.respawnTimer--; if(player.respawnTimer<=0) generateLevel(currentLevel); return; }
@@ -256,8 +335,8 @@
             player.vy += GRAVITY; if(player.vy > 20) player.vy = 20;
             player.x += player.vx; if(player.x < 0) player.x = 0;
 
-            if(player.vy > 0 && player.y + player.h > 770) {
-                player.y = 770 - player.h; player.vy = 0; player.isGrounded = true; jumpsLeft = 2;
+            if(player.vy > 0 && player.y + player.h > 670) {
+                player.y = 670 - player.h; player.vy = 0; player.isGrounded = true; jumpsLeft = 2;
             }
             player.y += player.vy;
 
@@ -286,7 +365,7 @@
                 let bot = levelData.bots[i];
                 if(!bot.alive) continue;
                 bot.x += bot.vx;
-                if(bot.x < 20 || bot.x > 1380) bot.vx *= -1;
+                if(bot.x < 20 || bot.x > 1180) bot.vx *= -1;
 
                 if(Math.abs((player.x+15) - (bot.x+15)) < 30 && Math.abs((player.y+20) - (bot.y+15)) < 30) {
                     if(player.vy > 0 && player.y + player.h < bot.y + 10) {
@@ -301,15 +380,38 @@
                     playerData.coins += 1; levelData.coins.splice(i,1); updateHUD();
                 }
             }
-            // 1000 УРОВНЕЙ
             if(player.x > levelData.finishX - 20) {
                 currentLevel++; if(currentLevel>=1000) { alert("1000 пройдено!"); currentLevel=0; } generateLevel(currentLevel);
             }
         }
 
-        function updateHUD() { hpNum.innerText = Math.floor(player.health); coinNum.innerText = playerData.coins; menuCoins.innerText = playerData.coins; }
+        function updateHUD() { 
+            hpNum.innerText = Math.floor(player.health); 
+            coinNum.innerText = playerData.coins; 
+            menuCoins.innerText = playerData.coins;
+            shopCoins.innerText = "💰 " + playerData.coins;
+        }
 
-        // --- РИСОВАНИЕ ГЕРОЯ И МИРА ---
+        // --- ПРЕВЬЮ И ОТРИСОВКА ---
+        function drawCostumePreview(pCtx, cx, cy, costume) {
+            const c = costume.color;
+            if(costume.type === 'Дракон') {
+                pCtx.fillStyle = c; pCtx.beginPath(); pCtx.arc(cx, cy+5, 14, 0, Math.PI*2); pCtx.fill();
+                pCtx.fillRect(cx-16, cy-5, 8, 14); pCtx.fillRect(cx+8, cy-5, 8, 14);
+                pCtx.fillRect(cx-6, cy-12, 3, 4); pCtx.fillRect(cx+3, cy-12, 3, 4);
+            } else if(costume.type === 'Тень') {
+                pCtx.shadowColor = "#8b5cf6"; pCtx.shadowBlur = 10;
+                pCtx.fillStyle = "#000"; pCtx.beginPath(); pCtx.arc(cx, cy, 14, 0, Math.PI*2); pCtx.fill();
+                pCtx.shadowBlur = 0;
+            } else {
+                pCtx.fillStyle = c; pCtx.fillRect(cx-6, cy+2, 12, 12);
+                pCtx.beginPath(); pCtx.arc(cx, cy-4, 10, 0, Math.PI*2); pCtx.fill();
+                if(costume.type === 'Маг') { pCtx.fillStyle = "#8b5cf6"; pCtx.fillRect(cx-10, cy+4, 4, 12); pCtx.fillRect(cx+6, cy+4, 4, 12); }
+                if(costume.type === 'Зомби') { pCtx.fillStyle = "#e0e0e0"; pCtx.fillRect(cx-4, cy-8, 8, 4); }
+                if(costume.type === 'Рыцарь') { pCtx.fillStyle = "#94a3b8"; pCtx.fillRect(cx-3, cy-8, 6, 3); }
+            }
+        }
+
         function drawHero(cx, cy, costume) {
             const c = costume.color;
             ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2;
@@ -348,9 +450,9 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, 1400, 800);
-            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, 1400, 800);
-            ctx.fillStyle = "#3e2723"; ctx.fillRect(0, 770, 1400, 30);
+            ctx.clearRect(0, 0, 1200, 700);
+            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, 1200, 700);
+            ctx.fillStyle = "#3e2723"; ctx.fillRect(0, 670, 1200, 30);
 
             for(let s of levelData.spikes) { ctx.fillStyle = "#dc2626"; ctx.beginPath(); ctx.moveTo(s.x+10, s.y-20); ctx.lineTo(s.x, s.y); ctx.lineTo(s.x+20, s.y); ctx.closePath(); ctx.fill(); }
             for(let t of levelData.trampolines) { ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill(); }
@@ -366,7 +468,7 @@
             if(!player.isDead || player.respawnTimer%20<10) drawHero(player.x+15, player.y+2, currentCostume);
         }
 
-        // --- ЗАПУСК ИГРЫ ---
+        // --- ЗАПУСК ---
         renderSkins();
         document.getElementById('startBtn').addEventListener('click', () => {
             document.getElementById('menu').style.display = 'none';
